@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solongdy</title>
     <style>
+        body {
+            font-family: Khmer OS Siemreap;
+        }
+
         div {
             display: flex;
             align-items: center;
@@ -41,22 +45,51 @@
 
 <body>
     <?php
-    $d = isset( $_POST[ "date" ] ) ? $_POST[ "date" ] : "";
+    $dateInput = isset( $_POST[ "date" ] ) ? $_POST[ "date" ] : "";
     ?>
     <h1>គណនា​អាយុ និង​ ចូលនិវត្ត</h1>
     <form method="post">
         <div>
             <label for="date">បញ្ចូលថ្ងៃខែឆ្នាំកំណើត : </label>
-            <input type="date" name="date" value="<?php echo "$d"; ?>">
+            <input type="date" name="date" value="<?php echo "$dateInput"; ?>">
             <button type="submit" name="submit">Submit</button>
         </div>
     </form>
     <?php
-    if ( isset( $_POST[ "submit" ] ) ) {
-        $d1 = strtotime( datetime: $d );
-        echo "<p>អ្នកមានអាយុ : " . date( "d - M - Y", $d1 ) . "</p>";
-        echo "<p>ថ្ងៃខែចូលនិវត្ត : " . date( "d - M - Y", $d1 ) . "</p>";
-        echo "<p>អាចបម្រើការងារបានរយៈ : " . date( "d - M - Y", $d1 ) . "</p>";
+    if ( isset( $_POST[ 'submit' ] ) ) {
+        function calculateAge( $dob )
+        {
+            $today = new DateTime( date( 'Y-m-d' ) );
+            $diff  = $today->diff( new DateTime( $dob ) );
+            return $diff;
+        }
+
+        function calculateRetirementDate( $dob, $retirementAge )
+        {
+            $dobDateTime    = new DateTime( $dob );
+            $retirementDate = $dobDateTime->modify( "+$retirementAge years" );
+            return $retirementDate;
+        }
+
+        function calculateTimeTillRetirement( $dob, $retirementAge )
+        {
+            $today          = new DateTime( date( 'Y-m-d' ) );
+            $retirementDate = calculateRetirementDate( $dob, $retirementAge );
+            $diff           = $today->diff( $retirementDate );
+            return $diff;
+        }
+
+        if ( isset( $_POST[ 'submit' ] ) ) {
+            $dob                = $_POST[ 'date' ];
+            $retirementAge      = 60;
+            $age                = calculateAge( $dob );
+            $retirementDate     = calculateRetirementDate( $dob, $retirementAge );
+            $timeTillRetirement = calculateTimeTillRetirement( $dob, $retirementAge );
+
+            echo "<p class=\"age\">អ្នកមានអាយុ : " . $age->y . " ឆ្នាំ, " . $age->m . " ខែ, " . $age->d . " ថ្ងៃ</p>";
+            echo "<p class=\"retire\">ថ្ងៃខែចូលនិវត្ត : " . $retirementDate->format( 'Y - m - d' ) . "</p>";
+            echo "<p class=\"timetr\">អាចបម្រើការងារបានរយៈពេល : " . $timeTillRetirement->y . " ឆ្នាំ, " . $timeTillRetirement->m . " ខែ, " . $timeTillRetirement->d . " ថ្ងៃ</p>";
+        }
     }
     ?>
 </body>
